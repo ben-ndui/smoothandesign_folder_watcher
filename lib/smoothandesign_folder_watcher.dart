@@ -28,6 +28,21 @@ class WatchedFile {
   final int sizeBytes;
 }
 
+/// Un dossier choisi par [SmoothFolderWatcher.pickDirectory].
+///
+/// [bookmark] est un security-scoped bookmark macOS : l'app étant
+/// sandboxée, [path] seul ne permet PAS de relire ce dossier après un
+/// relancement de l'app — l'accès accordé par `NSOpenPanel` ne survit pas
+/// au-delà de la session en cours. [bookmark] doit donc être persisté (ex.
+/// `base64Encode(bookmark)`) et repassé tel quel à [listFiles] /
+/// [startWatching], même après un redémarrage de l'app.
+class PickedDirectory {
+  const PickedDirectory({required this.path, required this.bookmark});
+
+  final String path;
+  final Uint8List bookmark;
+}
+
 /// Choisir et surveiller un dossier local sur macOS.
 ///
 /// Porté du prototype Xplor (Ben NDUI, 26/01/2024, `DirectorySurveillance.swift`) :
@@ -46,14 +61,21 @@ class SmoothFolderWatcher {
   static Stream<FolderFileChange>? _changes;
 
   /// Ouvre le sélecteur de dossier natif. `null` si l'utilisateur annule.
-  static Future<String?> pickDirectory() {
-    return _methods.invokeMethod<String>('pickDirectory');
+  static Future<PickedDirectory?> pickDirectory() async {
+    final raw = await _methods.invokeMethod<Map<dynamic, dynamic>>('pickDirectory');
+    if (raw == null) return null;
+    return PickedDirectory(
+      path: raw['path'] as String,
+      bookmark: (raw['bookmark'] as Uint8List),
+    );
   }
 
   /// Liste le contenu actuel du dossier (non récursif).
-  static Future<List<WatchedFile>> listFiles(String path) async {
-    final raw =
-        await _methods.invokeMethod<List<dynamic>>('listFiles', {'path': path});
+  static Future<List<WatchedFile>> listFiles(Uint8List bookmark) async {
+    final raw = await _methods.invokeMethod<List<dynamic>>(
+      'listFiles',
+      {'bookmark': bookmark},
+    );
     if (raw == null) return const [];
     return raw.map((entry) {
       final map = Map<String, dynamic>.from(entry as Map);
@@ -71,8 +93,8 @@ class SmoothFolderWatcher {
   /// Démarre la surveillance du dossier — les changements arrivent sur
   /// [changes]. Un seul dossier surveillé à la fois : un nouvel appel
   /// remplace la surveillance précédente côté natif.
-  static Future<void> startWatching(String path) {
-    return _methods.invokeMethod('startWatching', {'path': path});
+  static Future<void> startWatching(Uint8List bookmark) {
+    return _methods.invokeMethod('startWatching', {'bookmark': bookmark});
   }
 
   static Future<void> stopWatching() {

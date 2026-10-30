@@ -1,6 +1,6 @@
 name: smoothandesign_folder_watcher
 description: "Choisir et surveiller un dossier local sur macOS (FSEvents) : sélection native, liste du contenu, notifications en temps réel."
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/ben-ndui/smoothandesign_folder_watcher
 repository: https://github.com/ben-ndui/smoothandesign_folder_watcher
 
