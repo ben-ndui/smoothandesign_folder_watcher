@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smoothandesign_folder_watcher/smoothandesign_folder_watcher.dart';
@@ -90,4 +92,26 @@ void main() {
 
     expect(calls.single.method, 'stopWatching');
   });
+
+  test(
+    'resolveLocalPath sur macOS renvoie le chemin tel quel, sans appel natif '
+    '(l\'accès reste ouvert tant que startWatching tourne)',
+    () async {
+      final file = WatchedFile(
+        name: 'mix.wav',
+        path: '/Users/ingenieur/Enregistrements/mix.wav',
+        modifiedAt: DateTime(2026, 10, 30),
+        sizeBytes: 1024,
+      );
+
+      final localPath = await SmoothFolderWatcher.resolveLocalPath(
+        bookmark: fakeBookmark,
+        file: file,
+      );
+
+      expect(localPath, file.path);
+      expect(calls, isEmpty);
+    },
+    skip: !Platform.isMacOS ? 'ce test vérifie le comportement spécifique macOS' : false,
+  );
 }

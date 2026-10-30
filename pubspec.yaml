@@ -1,6 +1,6 @@
 name: smoothandesign_folder_watcher
-description: "Choisir et surveiller un dossier local sur macOS (FSEvents) : sélection native, liste du contenu, notifications en temps réel."
-version: 0.2.0
+description: "Choisir et surveiller un dossier local (macOS, iOS, Android) : sélection native, liste du contenu, changements en temps réel sur macOS (FSEvents) ou par polling ailleurs."
+version: 0.3.0
 homepage: https://github.com/ben-ndui/smoothandesign_folder_watcher
 repository: https://github.com/ben-ndui/smoothandesign_folder_watcher
 
@@ -35,6 +35,11 @@ flutter:
   plugin:
     platforms:
       macos:
+        pluginClass: SmoothandesignFolderWatcherPlugin
+      ios:
+        pluginClass: SmoothandesignFolderWatcherPlugin
+      android:
+        package: com.smoothandesign.smoothandesign_folder_watcher
         pluginClass: SmoothandesignFolderWatcherPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

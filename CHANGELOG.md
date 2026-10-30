@@ -1,3 +1,21 @@
+## 0.3.0
+
+* Ajoute iOS (`UIDocumentPickerViewController`) et Android (Storage Access
+  Framework). Ben, 30/10/2026 : « c'est une fonctionnalité qui peut être
+  utilisée... si l'ingé son est sur son téléphone ».
+* Pas de surveillance native sur iOS/Android (aucune API publique
+  équivalente à FSEvents pour un dossier arbitraire) : `startWatching` y
+  relit `listFiles` toutes les 5 secondes et calcule les changements côté
+  Dart (`diffFileLists`, testé unitairement). API identique partout, latence
+  différente — voir `SmoothFolderWatcher.supportsLiveWatch`.
+* Nouvelle méthode `resolveLocalPath` : sur Android, `WatchedFile.path` est
+  une `content://` URI (jamais un chemin disque, SAF ne donne jamais de
+  vrai chemin) ; sur iOS, l'accès security-scoped de `listFiles()` est déjà
+  refermé au moment d'un envoi ultérieur. Les deux copient le fichier dans
+  le cache de l'app pour obtenir un chemin réel et durablement lisible.
+  Sans effet sur macOS (déjà un vrai chemin, accès maintenu par
+  `startWatching`).
+
 ## 0.2.0
 
 * **Changement cassant** : `pickDirectory` renvoie désormais un
